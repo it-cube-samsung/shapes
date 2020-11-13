@@ -18,14 +18,13 @@
             android:id="@+id/draw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:button="@android:drawable/ic_menu_edit"
+            android:checked="true"
             android:text="Draw" />
 
         <RadioButton
             android:id="@+id/move"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:button="@android:drawable/ic_menu_compass"
             android:text="Move" />
     </RadioGroup>
 
@@ -37,5 +36,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioGroup"></com.example.shapes.Scene>
+
+    <RadioGroup
+        android:id="@+id/shapeGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@+id/radioGroup"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/rect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Rect" />
+
+        <RadioButton
+            android:id="@+id/circle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Circle" />
+
+        <RadioButton
+            android:id="@+id/triangle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Triangle" />
+    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
