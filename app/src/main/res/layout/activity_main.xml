@@ -66,4 +66,13 @@
             android:text="Triangle" />
     </RadioGroup>
 
+    <Spinner
+        android:id="@+id/colors"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="48dp"
+        android:entries="@array/colors"
+        app:layout_constraintStart_toEndOf="@+id/shapeGroup"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

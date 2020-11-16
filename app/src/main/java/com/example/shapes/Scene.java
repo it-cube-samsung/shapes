@@ -5,9 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -21,14 +21,26 @@ public class Scene extends View {
     int gridHeight;
     int countPoints;
     String mode = "draw";
-    private String typeShape = "rect";
+    String typeShape = "rect";
+    String color = "#000000";
 
-    Point corner = null;
-    int width;
-    int height;
+    // свойства прямоугольника
+    String colorRect;
+    Point corner;
+    int widthRect;
+    int heightRect;
 
-    Point center = null;
-    int radius;
+    // свойства круга
+    String colorCircle;
+    Point center;
+    float radius;
+
+    // свойства треугольника
+    String colorTriangle;
+    Point a = null;
+    Point b = null;
+    Point c = null;
+
 
     public Scene(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -36,9 +48,25 @@ public class Scene extends View {
         gridSize *= density;
     }
 
-//    public Scene(Context context) {
-//        super(context);
-//    }
+    private void createRect(String color, Point corner, int width, int height) {
+        this.colorRect = color;
+        this.corner = corner;
+        this.widthRect = width;
+        this.heightRect = height;
+    }
+
+    private void createCircle(String color, Point center, float radius) {
+        this.colorCircle = color;
+        this.center = center;
+        this.radius = radius;
+    }
+
+    private void createTriangle(String color, Point a, Point b, Point c) {
+        this.colorTriangle = color;
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -48,16 +76,31 @@ public class Scene extends View {
 
         drawGrid(canvas);
         drawPoints(canvas);
+
         drawRect(canvas);
         drawCircle(canvas);
+        drawTriangle(canvas);
+    }
+
+    private void drawTriangle(Canvas canvas) {
+        if (a != null) {
+            Paint paint = new Paint();
+            paint.setColor(Color.parseColor(this.colorTriangle));
+
+            Path path = new Path();
+            path.moveTo(a.x, a.y);
+            path.lineTo(b.x, b.y);
+            path.lineTo(c.x, c.y);
+            path.lineTo(a.x, a.y);
+
+            canvas.drawPath(path, paint);
+        }
     }
 
     private void drawCircle(Canvas canvas) {
         if (center != null) {
             Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.BLACK);
-            paint.setStrokeWidth(density);
+            paint.setColor(Color.parseColor(this.colorCircle));
             canvas.drawCircle(center.x, center.y, radius, paint);
         }
     }
@@ -65,10 +108,8 @@ public class Scene extends View {
     private void drawRect(Canvas canvas) {
         if (corner != null) {
             Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.BLACK);
-            paint.setStrokeWidth(density);
-            canvas.drawRect(corner.x, corner.y, corner.x + width, corner.y + height, paint);
+            paint.setColor(Color.parseColor(this.colorRect));
+            canvas.drawRect(corner.x, corner.y, corner.x + widthRect, corner.y + heightRect, paint);
         }
     }
 
@@ -111,47 +152,43 @@ public class Scene extends View {
 
     private void onDownTouch(int x, int y) {
         if (this.mode.equals("draw")) {
-            Log.i("onDownTouch", typeShape);
+            points[countPoints] = new Point(x, y);
+            countPoints += 1;
+
             switch (this.typeShape) {
-                case "rect": addRectPoint(x, y); break;
-                case "circle": addCirclePoint(x, y); break;
+                case "rect": checkRectForCreating(); break;
+                case "circle": checkCircleForCreating(); break;
+                case "triangle": checkTriangleForCreating(); break;
             }
+
+            invalidate();
         }
     }
 
-    private void addCirclePoint(int x, int y) {
-        points[countPoints] = new Point(x, y);
-        countPoints += 1;
+    private void checkRectForCreating() {
         if (countPoints >= 2) {
-            int radius = points[1].x - points[0].x;
-            createCircle(new Point(points[0]), radius);
-            countPoints = 0;
-        }
-        invalidate();
-    }
-
-    private void createCircle(Point center, int radius) {
-        this.center = center;
-        this.radius = radius;
-        invalidate();
-    }
-
-    private void addRectPoint(int x, int y) {
-        points[countPoints] = new Point(x, y);
-        countPoints += 1;
-        if (countPoints >= 3) {
             int width = points[1].x - points[0].x;
-            int height = points[2].y - points[0].y;
-            createRect(new Point(points[0]), width, height);
+            int height = points[1].y - points[0].y;
+            createRect(this.color, new Point(points[0]), width, height);
             countPoints = 0;
         }
-        invalidate();
     }
 
-    private void createRect(Point corner, int width, int height) {
-        this.corner = corner;
-        this.width = width;
-        this.height = height;
+    private void checkCircleForCreating() {
+        if (countPoints >= 2) {
+            int a = points[1].x - points[0].x;
+            int b = points[1].y - points[0].y;
+            float radius = (float)Math.sqrt( Math.pow(a, 2) + Math.pow(b, 2) );
+            createCircle(this.color, new Point(points[0]), radius);
+            countPoints = 0;
+        }
+    }
+
+    private void checkTriangleForCreating() {
+        if (countPoints >= 3) {
+            createTriangle(this.color, new Point(points[0]), new Point(points[1]), new Point(points[2]));
+            countPoints = 0;
+        }
     }
 
     public void setMode(String mode) {
@@ -162,5 +199,9 @@ public class Scene extends View {
         this.typeShape = type;
         countPoints = 0;
         invalidate();
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }
