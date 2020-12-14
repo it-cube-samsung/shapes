@@ -6,23 +6,37 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Spinner;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     RadioGroup shapes;
     Spinner colors;
     Scene scene;
+    JSONSerializer jsonSerializer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        jsonSerializer = new JSONSerializer("Shapes.json", getApplicationContext());
+
         scene = findViewById(R.id.scene);
         shapes = findViewById(R.id.shapeGroup);
         colors = findViewById(R.id.colors);
+
+        Button undoBtn = findViewById(R.id.button);
+        undoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scene.undo();
+            }
+        });
 
         shapes.setOnCheckedChangeListener(new OnCheckedChangeListener(){
             @Override
@@ -47,5 +61,23 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        try {
+            List<Shape> list = jsonSerializer.load();
+            scene.setShapes(list);
+        } catch (Exception e) {
+            Log.e("Error loading shapes", "", e);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        try {
+            jsonSerializer.save(scene.getShapes());
+        } catch (Exception e) {
+            Log.e("Error save", "", e);
+        }
     }
 }
